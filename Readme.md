@@ -1,0 +1,1 @@
+# This is sample code to convert simple EHR based json to phir compatible json
