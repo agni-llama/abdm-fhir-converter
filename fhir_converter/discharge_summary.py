@@ -18,6 +18,8 @@ from fhir.resources.codeableconcept import CodeableConcept
 from fhir.resources.reference import Reference
 import json
 
+from fhir_converter.common import get_patient_construct, create_section
+
 # from .utils import discharge_summary_section_details as section_details
 
 section_details = {
@@ -43,52 +45,6 @@ section_details = {
     ),
 }
 
-
-def create_section(title, code, display, text, references):
-    section = CompositionSection.construct(
-        title=title,
-        code=CodeableConcept.construct(
-            text=text,
-            coding=[
-                Coding.construct(
-                    system="http://snomed.info/sct", code=code, display=display
-                )
-            ],
-        ),
-        text=text,
-        entry=[
-            Reference.construct(reference=f"urn:uuid:{ref.id}")
-            for ref in references
-            if ref
-        ],
-    )
-    return section
-
-
-def get_patient_construct(patient_info):
-    patient_id = str(uuid.uuid4())
-    patient_construct = Patient.construct(
-        id=patient_id,
-        name=[{"text": patient_info.get("name", "No Name")}],
-        gender=patient_info.get("gender", ""),
-        meta={"profile": ["https://nrces.in/ndhm/fhir/r4/StructureDefinition/Patient"]},
-        identifier=[
-            {
-                "type": {
-                    "coding": [
-                        {
-                            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
-                            "code": "MR",
-                            "display": "Medical record number",
-                        }
-                    ]
-                },
-                "system": "https://healthid.ndhm.gov.in",
-                "value": patient_info.get("patient_id", "1234567890"),
-            }
-        ],
-    )
-    return patient_construct
 
 
 def get_condition_construct(condition_info_text, subject):
@@ -255,6 +211,7 @@ def create_fhir_bundle_discharge_summary(input_json):
     # final composition
     composition_id = str(uuid.uuid4())
     composition = Composition.construct(
+        id=composition_id,
         title="Discharge Summary",
         date=meta_data.get("discharge_date", ""),
         status=meta_data.get(
