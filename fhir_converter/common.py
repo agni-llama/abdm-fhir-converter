@@ -3,6 +3,7 @@ import uuid
 from fhir.resources.codeableconcept import CodeableConcept
 from fhir.resources.coding import Coding
 from fhir.resources.composition import CompositionSection
+from fhir.resources.organization import Organization
 from fhir.resources.patient import Patient
 from fhir.resources.practitioner import Practitioner
 from fhir.resources.reference import Reference
@@ -60,6 +61,34 @@ def get_practitioner_construct(practitioner_info: dict):
         ],
     )
     return practitioner_construct
+
+def get_organization_construct(organization_info: dict):
+    """
+    :param practitioner_info:
+    :return:
+    """
+    organization_id = str(uuid.uuid4())
+    organization_construct = Organization.construct(
+        id=organization_id,
+        name=[{"text": organization_info.get("name", "No Name")}],
+        meta={"profile": ["https://nrces.in/ndhm/fhir/r4/StructureDefinition/Practitioner"]},
+        identifier=[
+            {
+                "type": {
+                    "coding": [
+                        {
+                            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                            "code": "PRN",
+                            "display": "Provider number",
+                        }
+                    ]
+                },
+                "system": "https://facility.ndhm.gov.in",
+                "value": organization_info.get("organization_id", "1234567890"),
+            }
+        ],
+    )
+    return organization_construct
 
 def create_section(title, code, display, text, references):
     section = CompositionSection.construct(

@@ -111,7 +111,7 @@ if __name__ == "__main__":
         "medications": [
             {
                 "medication_name": "Aspirin",
-                "dosage_instruction": "Take 1 tablet daily"
+                "dosage_instruction": "Take 1 tablet daily",
             },
             {
                 "medication_name": "Aspirin 2",
