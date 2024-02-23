@@ -1,8 +1,12 @@
 import datetime
 import uuid
-
+from pydantic.v1 import Field
+from fhir.resources import datatype
 from fhir.resources.R4B.diagnosticreport import DiagnosticReport
+from fhir.resources.R4B.media import Media
 from fhir.resources.R4B.servicerequest import ServiceRequest
+from fhir.resources.attachment import Attachment
+from fhir.resources.backboneelement import BackboneElement
 from fhir.resources.bundle import Bundle, BundleEntry
 from fhir.resources.codeableconcept import CodeableConcept
 from fhir.resources.coding import Coding
@@ -16,6 +20,27 @@ from fhir_converter.common import get_patient_construct, create_section, get_pra
     get_organization_construct
 
 
+class MediaType(datatype.DataType):
+
+    resource_type = Field("MediaType", const=True)
+
+    link: Reference = Field(
+        None,
+        alias="link",
+        title="Link of media",
+        description="media link",
+        # if property is element of this resource.
+        element_property=True,
+    )
+
+    @classmethod
+    def elements_sequence(cls):
+        """returning all elements names from
+        ``MediaType`` according specification,
+        with preserving original sequence order.
+        """
+        return ["link"]
+
 def create_diagnostic_report(input_json: dict):
     reference_data = []
 
@@ -26,13 +51,13 @@ def create_diagnostic_report(input_json: dict):
     performer_info = input_json.get("performer", {})
     performer = get_organization_construct(performer_info)
     performer_ref = Reference.construct(
-        reference=f"urn:uuid:/{performer.id}", display=performer.name[0]["text"]
+        reference=f"urn:uuid:{performer.id}", display=performer.name[0]["text"]
     )
     practitioner_ref = Reference.construct(
-        reference=f"urn:uuid:/{practitioner.id}", display=practitioner.name[0]["text"]
+        reference=f"urn:uuid:{practitioner.id}", display=practitioner.name[0]["text"]
     )
     patient_ref = Reference.construct(
-        reference=f"urn:uuid:/{patient.id}", display=patient.name[0]["text"]
+        reference=f"urn:uuid:{patient.id}", display=patient.name[0]["text"]
     )
     service_request = ServiceRequest.construct(
         id=str(uuid.uuid4()),
@@ -101,24 +126,55 @@ def create_diagnostic_report(input_json: dict):
         reference_data.append(observation_construct)
 
     request_id = str(uuid.uuid4())
-    diagnostic_report_construct = DiagnosticReport.construct(
-        id=request_id,
-        status="active",
-        intent="order",
-        basedOn=[service_request_ref],
-        code=CodeableConcept.construct(
-            text=input_json.get("report_name")
-        ),
-        subject=patient_ref,
-        issued=report_date,
-        requester=practitioner_ref,
-        performer=performer_ref,
-        results_interpretation=[practitioner_ref],
-        results=[Reference.construct(
-            reference=f"urn:uuid:/{observation.id}", display=f"Observation/{observation.code.text}"
-        ) for observation in observations],
-        conclusion=input_json.get("conclusion", "No Conclusion")
-    )
+    if input_json.get("imaging"):
+        link_media = Media.construct(
+            id=str(uuid.uuid4()),
+            status="completed",
+            content=Attachment.construct(
+                contentType=input_json["imaging"]["type"],
+                data=input_json["imaging"]["data"]
+            )
+        )
+        reference_data.append(link_media)
+        link_media_ref = Reference.construct(
+            reference=f"urn:uuid:{link_media.id}", display="Imaging data"
+        )
+
+        diagnostic_report_construct = DiagnosticReport.construct(
+            id=request_id,
+            status="final",
+            code=CodeableConcept.construct(
+                text=input_json.get("report_name")
+            ),
+            subject=patient_ref,
+            issued=report_date,
+            performer=performer_ref,
+            media = [
+                MediaType.construct(
+                    link=link_media_ref
+                )
+            ]
+        )
+    else:
+        diagnostic_report_construct = DiagnosticReport.construct(
+            id=request_id,
+            status="active",
+            intent="order",
+            basedOn=[service_request_ref],
+            code=CodeableConcept.construct(
+                text=input_json.get("report_name")
+            ),
+            subject=patient_ref,
+            issued=report_date,
+            requester=practitioner_ref,
+            performer=performer_ref,
+            results_interpretation=[practitioner_ref],
+            results=[Reference.construct(
+                reference=f"urn:uuid:/{observation.id}", display=f"Observation/{observation.code.text}"
+            ) for observation in observations],
+            conclusion=input_json.get("conclusion", "No Conclusion")
+        )
+    reference_data.append(diagnostic_report_construct)
 
     composition_id = str(uuid.uuid4())
     prescription = Composition.construct(
@@ -157,11 +213,13 @@ if __name__ == "__main__":
     input_json = {
         "patient": {
             "name": "John Doe",
-            "patient_id": "somepateintid"
+            "patient_id": "somepateintid",
+            "gender": "Male"
         },
         "practitioner": {
             "name": "Dr. Smith",
-            "practitioner_id": "somepractitionerid"
+            "practitioner_id": "somepractitionerid",
+            "gender": "Male"
         },
         "performer": {
             "name": "Org XYZ Ltd.",
@@ -190,6 +248,10 @@ if __name__ == "__main__":
                 "ref_low": "60",
                 "ref_high": "160"
             }
-        ]
+        ],
+        "imaging": {
+            "type": "image/jpeg",
+            "data": "base64 encoded data"
+        }
     }
     print(create_diagnostic_report(input_json))

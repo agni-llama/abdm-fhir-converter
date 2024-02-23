@@ -96,7 +96,7 @@ def get_observation_construct(observation_info_text, subject):
             "div": f'<div xmlns="http://www.w3.org/1999/xhtml"><p>{observation_info_text}</p></div>',
         },
         status="final",  # registered | preliminary | final | amended +
-        subject=Reference.construct(reference=f"urn:uuid:/{subject.id}"),
+        subject=Reference.construct(reference=f"urn:uuid:{subject.id}"),
     )
     return observation_construct
 
@@ -120,7 +120,7 @@ def get_allergy_intolerance_construct(allergy_info_text, subject):
             "status": "generated",
             "div": f'<div xmlns="http://www.w3.org/1999/xhtml"><p>{allergy_info_text}</p></div>',
         },
-        patient=Reference.construct(reference=f"urn:uuid:/{subject.id}"),
+        patient=Reference.construct(reference=f"urn:uuid:{subject.id}"),
     )
     return allergy_construct
 
@@ -145,7 +145,7 @@ def get_procedure_construct(procedure_info_text, subject):
             "div": f'<div xmlns="http://www.w3.org/1999/xhtml"><p>{procedure_info_text}</p></div>',
         },
         status="completed",  # preparation | in-progress | not-done | on-hold | stopped | completed | entered-in-error | unknown
-        subject=Reference.construct(reference=f"urn:uuid:/{subject.id}"),
+        subject=Reference.construct(reference=f"urn:uuid:{subject.id}"),
     )
     return procedure_construct
 
@@ -156,7 +156,7 @@ def get_familymemberhistory_construct(familymemberhistory_info_text, subject):
     familymemberhistory_construct = FamilyMemberHistory.construct(
         id=id,
         status="completed",  # partial | completed | entered-in-error | health-unknown
-        patient=Reference.construct(reference=f"urn:uuid:/{subject.id}"),
+        patient=Reference.construct(reference=f"urn:uuid:{subject.id}"),
         relationship=CodeableConcept.construct(
             text=familymemberhistory_info_text,
             coding=[
@@ -228,7 +228,7 @@ def create_fhir_bundle_discharge_summary(input_json):
             ],
         ),
         subject=Reference.construct(
-            reference=f"urn:uuid:/{patient.id}", display=patient.name[0]["text"]
+            reference=f"urn:uuid:{patient.id}", display=patient.name[0]["text"]
         ),
         section=[
             create_section(
