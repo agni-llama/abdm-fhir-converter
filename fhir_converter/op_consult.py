@@ -45,6 +45,7 @@ def create_opconsult_record(input_json):
     )
 
     encounter = Encounter.construct(
+        id=str(uuid.uuid4()),
         status="finished",
         subject=patient_ref,
         class_fhir=Coding.construct(
@@ -53,7 +54,7 @@ def create_opconsult_record(input_json):
             display="inpatient encounter"
         )
     )
-    encounter_ref = Reference.construct(reference=f"urn:uuid:{encounter.id}")
+    encounter_ref = Reference.construct(reference=f"urn:uuid:{encounter.id}", display="Encounter/OP Consult Record")
 
     ref_data = [patient, practitioner,encounter]
 
@@ -79,7 +80,7 @@ def create_opconsult_record(input_json):
 
     ref_data.extend(sections)
 
-    section_refs = [Reference.construct(reference=f"urn:uuid:{section.id}") for section in sections]
+    section_refs = [Reference.construct(reference=f"urn:uuid:{section.id}", display=f"{section.title}") for section in sections]
 
     # Create Composition resource for OP Consult Record
     composition = Composition.construct(
@@ -103,9 +104,9 @@ def create_opconsult_record(input_json):
     bundle = Bundle.construct()
     bundle.type = "collection"
     bundle.entry = [
-        BundleEntry.construct(resource=composition)
+        BundleEntry.construct(fullUrl=f"urn:uuid:{composition.id}", resource=composition)
     ]
-    bundle.entry.extend(ref_data)
+    bundle.entry.extend([BundleEntry.construct(fullUrl=f"urn:uuid:{composition.id}", resource=ref) for ref in ref_data])
 
     return bundle.json(indent=2)
 
