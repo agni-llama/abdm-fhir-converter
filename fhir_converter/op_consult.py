@@ -6,6 +6,7 @@ from fhir.resources.coding import Coding
 from fhir.resources.composition import Composition
 from fhir.resources.composition import CompositionSection
 from fhir.resources.codeableconcept import CodeableConcept
+from fhir.resources.encounter import Encounter
 from fhir.resources.reference import Reference
 
 from fhir_converter.common import get_patient_construct, get_practitioner_construct
@@ -43,7 +44,18 @@ def create_opconsult_record(input_json):
         reference=f"urn:uuid:{practitioner.id}", display=practitioner.name[0]["text"]
     )
 
-    ref_data = [patient, practitioner]
+    encounter = Encounter.construct(
+        status="finished",
+        subject=patient_ref,
+        class_fhir=Coding.construct(
+            system="http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            code="IMP",
+            display="inpatient encounter"
+        )
+    )
+    encounter_ref = Reference.construct(reference=f"urn:uuid:{encounter.id}")
+
+    ref_data = [patient, practitioner,encounter]
 
     section_details = {
         "Chief Complaints": ("422843007", "Chief complaint section"),
@@ -82,6 +94,7 @@ def create_opconsult_record(input_json):
                 display="Clinical consultation report"
             )
         ),
+        encounter=encounter_ref,
         author=[practitioner_ref],
         subject=patient_ref,
         section=section_refs
