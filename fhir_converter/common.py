@@ -3,6 +3,7 @@ import uuid
 from fhir.resources.codeableconcept import CodeableConcept
 from fhir.resources.coding import Coding
 from fhir.resources.composition import CompositionSection
+from fhir.resources.contactpoint import ContactPoint
 from fhir.resources.organization import Organization
 from fhir.resources.patient import Patient
 from fhir.resources.practitioner import Practitioner
@@ -10,27 +11,62 @@ from fhir.resources.reference import Reference
 
 
 def get_patient_construct(patient_info):
-    patient_id = str(uuid.uuid4())
-    patient_construct = Patient.construct(
-        id=patient_id,
-        name=[{"text": patient_info.get("name", "No Name")}],
-        gender=patient_info.get("gender", ""),
-        meta={"profile": ["https://nrces.in/ndhm/fhir/r4/StructureDefinition/Patient"]},
-        identifier=[
+    name = patient_info["name"]
+    gender = patient_info["gender"]
+    patient_id = patient_info["patient_id"]
+    abha_no = patient_info.get("abha_no")
+    telephone_number = patient_info.get("telephone_number")
+
+    identifier = [
+        {
+            "type": {
+                "coding": [
+                    {
+                        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                        "code": "MR",
+                        "display": "Medical record number",
+                    }
+                ]
+            },
+            "system": "https://healthid.ndhm.gov.in",
+            "value": patient_id,
+        }
+    ]
+
+    if abha_no:
+        identifier.append(
             {
                 "type": {
                     "coding": [
                         {
                             "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
-                            "code": "MR",
-                            "display": "Medical record number",
+                            "code": "AN",
+                            "display": "Account number",
                         }
                     ]
                 },
                 "system": "https://healthid.ndhm.gov.in",
-                "value": patient_info.get("patient_id", "1234567890"),
+                "value": abha_no,
             }
-        ],
+        )
+    extra_args = {}
+    if telephone_number:
+        extra_args["telecom"] = ContactPoint.construct(
+            system="phone",
+            value=telephone_number,
+            use="mobile"
+        )
+
+
+
+    patient_ref_id = str(uuid.uuid4())
+    patient_construct = Patient.construct(
+        id=patient_ref_id,
+        name=[{"text": name}],
+        gender=gender,
+        meta={"profile": ["https://nrces.in/ndhm/fhir/r4/StructureDefinition/Patient"]},
+        identifier=identifier,
+        **extra_args
     )
     return patient_construct
 
@@ -39,10 +75,22 @@ def get_practitioner_construct(practitioner_info: dict):
     :param practitioner_info:
     :return:
     """
-    practitioner_id = str(uuid.uuid4())
+    name = practitioner_info["name"]
+    practitioner_id = practitioner_info["practitioner_id"]
+    telephone_number = practitioner_info.get("telephone_number")
+
+    extra_args = {}
+    if telephone_number:
+        extra_args["telecom"] = ContactPoint.construct(
+            system="phone",
+            value=telephone_number,
+            use="mobile"
+        )
+
+    practitioner_ref_id = str(uuid.uuid4())
     practitioner_construct = Practitioner.construct(
-        id=practitioner_id,
-        name=[{"text": practitioner_info.get("name", "No Name")}],
+        id=practitioner_ref_id,
+        name=[{"text": name}],
         meta={"profile": ["https://nrces.in/ndhm/fhir/r4/StructureDefinition/Practitioner"]},
         identifier=[
             {
@@ -56,7 +104,7 @@ def get_practitioner_construct(practitioner_info: dict):
                     ]
                 },
                 "system": "https://healthid.ndhm.gov.in",
-                "value": practitioner_info.get("practitioner_id", "1234567890"),
+                "value": practitioner_id,
             }
         ],
     )
