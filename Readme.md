@@ -1,4 +1,4 @@
-# This is sample code to convert simple json to fhir compatible json
+# This is sample code to convert simple json to ABDM compatible FHIR json
 
 ## How to install
 
