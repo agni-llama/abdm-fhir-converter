@@ -1,4 +1,4 @@
-# This is sample code to convert simple EHR based json to phir compatible json
+# This is sample code to convert simple json to fhir compatible json
 
 ## How to install
 
