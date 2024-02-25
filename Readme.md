@@ -1,4 +1,12 @@
-# This is sample code to convert simple json to ABDM compatible FHIR json
+# ABDM-Compliant FHIR Converter
+
+## Introduction
+This project provides a FHIR (Fast Healthcare Interoperability Resources) converter compliant with the Ayushman Bharat Digital Mission (ABDM) standards, as outlined by the National Resource Centre for EHR Standards (NRCeS) in India. It aims to facilitate the seamless conversion of healthcare data into FHIR-compliant formats, ensuring interoperability and accessibility across different healthcare systems in India.
+
+## Features
+**Compliance with ABDM**: Adheres to the FHIR profiles and standards specified for the ABDM ecosystem.
+
+**Wide Coverage**: Supports a broad range of healthcare data types, including patient records, clinical notes, and lab reports.
 
 ## How to install
 
