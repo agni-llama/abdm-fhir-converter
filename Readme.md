@@ -52,19 +52,19 @@ Table containing different conversion. Table includes the following columns:
 
 <table>
 <tr>
-<td> Status </td> <td> Response </td>
+<td> <b>HI Type</b> </td> <td> Sample input json </td>
 </tr>
 
 <tr>
-<td> Discharge Sumary </td>
+<td> Discharge Summary </td>
 <td>
 
-```json
-input_json = {
+```python
+{
     "patient": {
         "patient_id": "1234567890",
-        "name": "Aman",  # mandatory
-        "gender": "Male",  # mandatory
+        "name": "Aman",   #mandatory
+        "gender": "Male",  #mandatory
         "base64_file": "sample text",
         "dob": "sample text",
         "phone": "sample text",
@@ -93,10 +93,75 @@ input_json = {
 </td>
 </tr>
 <tr>
-<td> 400 </td>
+<td> OPConsult </td>
 <td>
 
-**Markdown** _here_. (↕︎ Blank lines above and below!)
+```python
+{
+    "patient": {
+        "name": "Aman",
+        "gender": "Male",
+        "patient_id": "1234567890",
+        "telecom": "1234567890",
+    },
+    "practitioner": {
+        "name": "Aman Practitioner",
+        "gender": "Female",
+        "practitioner_id": "1234567890",
+        "telecom": "1234567890",
+    },
+    "date": "2021-06-01",
+    "ChiefComplaints": "sample text",
+    "PhysicalExamination": "sample text",
+    "Allergies": "sample text",
+    "MedicalHistory": "sample text",
+    "FamilyHistory": "sample text",
+    "InvestigationAdvice": "sample text",
+    "Medications": "sample text",
+    "FollowUp": "sample text",
+    "Procedure": "sample text",
+    "Referral": "sample text",
+    "OtherObservations": "sample text",
+    "DocumentReference": "sample text",
+}
+```
+
+</td>
+</tr>
+
+<tr>
+<td> <a href="https://nrces.in/ndhm/fhir/r4/StructureDefinition-PrescriptionRecord.html">Prescription</a>  </td>
+<td>
+
+```python
+{
+    "patient": {
+        "name": "Aman",
+        "gender": "Male",
+        "patient_id": "1234567890",
+        "telecom": "1234567890",
+    },
+    "practitioner": {
+        "name": "Aman Practitioner",
+        "gender": "Female",
+        "practitioner_id": "1234567890",
+        "telecom": "1234567890",
+    },
+    "date": "2021-06-01",
+    "ChiefComplaints": "sample text",
+    "PhysicalExamination": "sample text",
+    "Allergies": "sample text",
+    "MedicalHistory": "sample text",
+    "FamilyHistory": "sample text",
+    "InvestigationAdvice": "sample text",
+    "Medications": "sample text",
+    "FollowUp": "sample text",
+    "Procedure": "sample text",
+    "Referral": "sample text",
+    "OtherObservations": "sample text",
+    "DocumentReference": "sample text",
+}
+```
 
 </td>
 </tr>
